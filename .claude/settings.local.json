@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "WebFetch(domain:export.arxiv.org)",
+      "WebSearch",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
