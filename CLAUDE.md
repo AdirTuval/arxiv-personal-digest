@@ -20,7 +20,8 @@ arxiv-personal-digest/
 │
 └── src/
     ├── main.py                 # Entry point — orchestrates one full run
-    ├── fetcher.py              # Fetches abstracts from arXiv API
+    ├── fetcher.py              # Fetch + dedup layer (wraps arxiv.py)
+    ├── arxiv.py                # Low-level arXiv API client (fully implemented)
     ├── filter.py               # Uses Claude to filter relevant papers
     ├── notion_client.py        # Pushes papers to Notion database
     ├── updater.py              # Reads scores from Notion, updates preferences
