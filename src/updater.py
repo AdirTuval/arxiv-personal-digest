@@ -23,7 +23,7 @@ def update_preferences(
     max_papers_to_push, example_papers).
 
     Args:
-        scored_papers: Dicts from notion_client.fetch_scored_papers().
+        scored_papers: Dicts from notion_utils.fetch_scored_papers().
         preferences_path: Path to preferences.yaml.
 
     Returns:

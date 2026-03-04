@@ -9,7 +9,7 @@ from models import FilteredPaper, Paper, PreferencesUpdate
 
 
 class TestRun:
-    @patch("main.notion_client")
+    @patch("main.notion_utils")
     @patch("main.filter")
     @patch("main.fetcher")
     @patch("main.updater")
@@ -55,7 +55,7 @@ class TestRun:
         mock_filter.filter_papers.assert_called_once()
         mock_notion.push_papers.assert_called_once()
 
-    @patch("main.notion_client")
+    @patch("main.notion_utils")
     @patch("main.filter")
     @patch("main.fetcher")
     @patch("main.updater")
@@ -91,7 +91,7 @@ class TestRun:
         passed_scored = args[0] if args else kwargs.get("scored_papers", [])
         assert passed_scored == scored
 
-    @patch("main.notion_client")
+    @patch("main.notion_utils")
     @patch("main.filter")
     @patch("main.fetcher")
     @patch("main.updater")
@@ -133,7 +133,7 @@ class TestRun:
         passed_prefs = args[1] if len(args) > 1 else kwargs.get("preferences", {})
         assert passed_prefs == prefs
 
-    @patch("main.notion_client")
+    @patch("main.notion_utils")
     @patch("main.filter")
     @patch("main.fetcher")
     @patch("main.updater")
@@ -179,7 +179,7 @@ class TestRun:
         saved_ids = args[1] if len(args) > 1 else kwargs.get("seen", set())
         assert "2401.12345" in saved_ids
 
-    @patch("main.notion_client")
+    @patch("main.notion_utils")
     @patch("main.filter")
     @patch("main.fetcher")
     @patch("main.updater")
@@ -210,7 +210,7 @@ class TestRun:
         mock_filter.filter_papers.assert_not_called()
         mock_notion.push_papers.assert_not_called()
 
-    @patch("main.notion_client")
+    @patch("main.notion_utils")
     @patch("main.filter")
     @patch("main.fetcher")
     @patch("main.updater")
