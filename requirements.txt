@@ -1,0 +1,6 @@
+anthropic
+httpx
+notion-client
+pydantic
+pyyaml
+python-dotenv

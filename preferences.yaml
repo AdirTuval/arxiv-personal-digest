@@ -1,0 +1,31 @@
+field: cs.AI
+max_results_per_run: 50
+max_papers_to_push: 5
+
+immutable_interests:
+  - LLM agents with tool use
+  - Efficient inference and quantization
+
+interests:
+  - RAG and retrieval systems for production use
+  - LLM fine-tuning on limited hardware
+
+avoid:
+  - Pure benchmark papers with no practical application
+  - Vision-only models unrelated to language
+
+exploration:
+  enabled: true
+  wildcard_count: 1
+  adjacent_categories:
+    - cs.IR
+    - cs.HC
+    - stat.ML
+
+scoring_history_summary: ""
+
+example_papers:
+  - title: "ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs"
+    reason: "Practical tool-use framework with real API integration"
+  - title: "AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration"
+    reason: "Quantization technique that runs on consumer hardware"
