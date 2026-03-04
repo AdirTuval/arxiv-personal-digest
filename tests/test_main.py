@@ -41,7 +41,7 @@ class TestRun:
         mock_filter.filter_papers.return_value = [
             FilteredPaper(
                 arxiv_id="2401.12345", title="P1", abstract="A",
-                url="u1", reason="r", is_wildcard=False,
+                url="u1", reason="r", short_summary="s", is_wildcard=False,
             )
         ]
         mock_notion.push_papers.return_value = ["2401.12345"]
@@ -160,10 +160,11 @@ class TestRun:
         mock_fetcher.fetch_new_papers.return_value = [
             Paper(arxiv_id="2401.12345", title="P1", abstract="A", url="u1")
         ]
+        mock_fetcher.load_seen_papers.return_value = set()
         mock_filter.filter_papers.return_value = [
             FilteredPaper(
                 arxiv_id="2401.12345", title="P1", abstract="A",
-                url="u1", reason="r", is_wildcard=False,
+                url="u1", reason="r", short_summary="s", is_wildcard=False,
             )
         ]
         pushed_ids = ["2401.12345"]
@@ -238,7 +239,7 @@ class TestRun:
         mock_filter.filter_papers.return_value = [
             FilteredPaper(
                 arxiv_id="2401.12345", title="P1", abstract="A",
-                url="u1", reason="r", is_wildcard=False,
+                url="u1", reason="r", short_summary="s", is_wildcard=False,
             )
         ]
         mock_notion.push_papers.return_value = ["2401.12345"]
