@@ -1,6 +1,6 @@
 anthropic
 httpx
-notion-client
+notion-client==2.3.0
 pydantic
 pyyaml
 python-dotenv

@@ -13,7 +13,8 @@ class FilteredPaper(BaseModel):
     title: str
     abstract: str
     url: str
-    reason: str
+    reason: str           # Why Claude selected it
+    short_summary: str    # 2-3 sentence plain-English summary
     is_wildcard: bool
 
 
