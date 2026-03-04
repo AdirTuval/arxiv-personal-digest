@@ -4,3 +4,4 @@ notion-client
 pydantic
 pyyaml
 python-dotenv
+pytest

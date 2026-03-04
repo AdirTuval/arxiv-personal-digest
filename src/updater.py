@@ -1,6 +1,9 @@
 import logging
 from pathlib import Path
 
+import anthropic
+import yaml
+
 from models import PreferencesUpdate
 
 logger = logging.getLogger(__name__)
