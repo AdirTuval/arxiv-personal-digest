@@ -1,9 +1,12 @@
-from unittest.mock import MagicMock, call, patch
+import os
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from models import FilteredPaper
-from notion_utils import fetch_scored_papers, push_papers
+from notion_utils import fetch_papers, fetch_scored_papers, push_papers
+
+_NOTION_ENV = {"NOTION_API_KEY": "test-key", "NOTION_DATABASE_ID": "test-db-id"}
 
 
 def _make_filtered_paper(arxiv_id, is_wildcard=False):
@@ -17,6 +20,20 @@ def _make_filtered_paper(arxiv_id, is_wildcard=False):
     )
 
 
+def _make_notion_page(arxiv_id, title, scored=False, score=None, skip_reason=None, paper_type="Regular"):
+    return {
+        "properties": {
+            "Title": {"title": [{"plain_text": title}]},
+            "URL": {"url": f"http://arxiv.org/abs/{arxiv_id}"},
+            "Score": {"number": score},
+            "Skip Reason": {"select": {"name": skip_reason} if skip_reason else None},
+            "Type": {"select": {"name": paper_type}},
+            "Scored": {"checkbox": scored},
+        }
+    }
+
+
+@patch.dict(os.environ, {"NOTION_API_KEY": "test-key", "NOTION_DATABASE_ID": "test-db-id"})
 class TestPushPapers:
     @patch("notion_utils.Client", create=True)
     def test_push_papers_creates_pages(self, mock_notion_cls):
@@ -51,7 +68,7 @@ class TestPushPapers:
             "properties"
         )
         type_val = properties.get("Type", {}).get("select", {}).get("name", "")
-        assert type_val == "\ud83d\udd0d Explore"
+        assert type_val == "🔍 Explore"
 
     @patch("notion_utils.Client", create=True)
     def test_push_papers_sets_regular_type(self, mock_notion_cls):
@@ -107,7 +124,6 @@ class TestPushPapers:
     def test_push_papers_partial_failure(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
-        # First call succeeds, second raises
         mock_client.pages.create.side_effect = [
             {"id": "page-1"},
             Exception("Notion API error"),
@@ -124,28 +140,18 @@ class TestPushPapers:
         assert "2401.12346" not in result
 
 
-class TestFetchScoredPapers:
+@patch.dict(os.environ, {"NOTION_API_KEY": "test-key", "NOTION_DATABASE_ID": "test-db-id"})
+class TestFetchPapers:
     @patch("notion_utils.Client", create=True)
-    def test_fetch_scored_papers_returns_dicts(self, mock_notion_cls):
+    def test_fetch_papers_returns_dicts(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
         mock_client.databases.query.return_value = {
-            "results": [
-                {
-                    "properties": {
-                        "Title": {"title": [{"plain_text": "Paper A"}]},
-                        "URL": {"url": "http://arxiv.org/abs/2401.12345"},
-                        "Score": {"number": 4},
-                        "Skip Reason": {"select": None},
-                        "Type": {"select": {"name": "Regular"}},
-                        "Scored": {"checkbox": True},
-                    }
-                }
-            ],
+            "results": [_make_notion_page("2401.12345", "Paper A", scored=True, score=4)],
             "has_more": False,
         }
 
-        result = fetch_scored_papers()
+        result = fetch_papers()
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -155,39 +161,31 @@ class TestFetchScoredPapers:
         assert "score" in paper
         assert "skip_reason" in paper
         assert "paper_type" in paper
+        assert "scored" in paper
+        assert paper["arxiv_id"] == "2401.12345"
+        assert paper["title"] == "Paper A"
 
     @patch("notion_utils.Client", create=True)
-    def test_fetch_scored_papers_filters_scored_only(self, mock_notion_cls):
+    def test_fetch_papers_queries_all(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
-        # The implementation should query with a filter for Scored=True
         mock_client.databases.query.return_value = {
             "results": [
-                {
-                    "properties": {
-                        "Title": {"title": [{"plain_text": "Scored Paper"}]},
-                        "URL": {"url": "http://arxiv.org/abs/2401.12345"},
-                        "Score": {"number": 5},
-                        "Skip Reason": {"select": None},
-                        "Type": {"select": {"name": "Regular"}},
-                        "Scored": {"checkbox": True},
-                    }
-                }
+                _make_notion_page("2401.00001", "Scored Paper", scored=True, score=5),
+                _make_notion_page("2401.00002", "Unscored Paper", scored=False),
             ],
             "has_more": False,
         }
 
-        result = fetch_scored_papers()
+        result = fetch_papers()
 
-        # Verify the query included a filter for Scored checkbox
-        query_call = mock_client.databases.query.call_args
-        query_filter = query_call.kwargs.get("filter") or query_call[1].get("filter", {})
-        # The filter should reference the Scored checkbox
-        filter_str = str(query_filter)
-        assert "Scored" in filter_str or "scored" in filter_str.lower()
+        assert len(result) == 2
+        arxiv_ids = [p["arxiv_id"] for p in result]
+        assert "2401.00001" in arxiv_ids
+        assert "2401.00002" in arxiv_ids
 
     @patch("notion_utils.Client", create=True)
-    def test_fetch_scored_papers_empty_database(self, mock_notion_cls):
+    def test_fetch_papers_empty_database(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
         mock_client.databases.query.return_value = {
@@ -195,6 +193,79 @@ class TestFetchScoredPapers:
             "has_more": False,
         }
 
+        result = fetch_papers()
+
+        assert result == []
+
+    @patch("notion_utils.Client", create=True)
+    def test_fetch_papers_handles_pagination(self, mock_notion_cls):
+        mock_client = MagicMock()
+        mock_notion_cls.return_value = mock_client
+        mock_client.databases.query.side_effect = [
+            {
+                "results": [_make_notion_page("2401.00001", "Page 1 Paper")],
+                "has_more": True,
+                "next_cursor": "cursor-abc",
+            },
+            {
+                "results": [_make_notion_page("2401.00002", "Page 2 Paper")],
+                "has_more": False,
+            },
+        ]
+
+        result = fetch_papers()
+
+        assert len(result) == 2
+        arxiv_ids = [p["arxiv_id"] for p in result]
+        assert "2401.00001" in arxiv_ids
+        assert "2401.00002" in arxiv_ids
+        assert mock_client.databases.query.call_count == 2
+
+
+class TestFetchScoredPapers:
+    @patch("notion_utils.fetch_papers")
+    def test_fetch_scored_papers_returns_only_scored(self, mock_fetch_papers):
+        mock_fetch_papers.return_value = [
+            {"arxiv_id": "2401.00001", "title": "Scored", "score": 4, "skip_reason": None, "paper_type": "Regular", "scored": True},
+            {"arxiv_id": "2401.00002", "title": "Unscored", "score": None, "skip_reason": None, "paper_type": "Regular", "scored": False},
+        ]
+
+        result = fetch_scored_papers()
+
+        assert len(result) == 1
+        assert result[0]["arxiv_id"] == "2401.00001"
+
+    @patch("notion_utils.fetch_papers")
+    def test_fetch_scored_papers_empty_when_none_scored(self, mock_fetch_papers):
+        mock_fetch_papers.return_value = [
+            {"arxiv_id": "2401.00001", "title": "Unscored", "score": None, "skip_reason": None, "paper_type": "Regular", "scored": False},
+            {"arxiv_id": "2401.00002", "title": "Also Unscored", "score": None, "skip_reason": None, "paper_type": "Regular", "scored": False},
+        ]
+
         result = fetch_scored_papers()
 
         assert result == []
+
+
+@patch.dict(os.environ, {"NOTION_API_KEY": "test-key", "NOTION_DATABASE_ID": "test-db-id"})
+class TestRoundTrip:
+    @patch("notion_utils.Client", create=True)
+    def test_push_then_fetch_papers(self, mock_notion_cls):
+        mock_client = MagicMock()
+        mock_notion_cls.return_value = mock_client
+        mock_client.pages.create.return_value = {"id": "page-123"}
+        mock_client.databases.query.return_value = {
+            "results": [_make_notion_page("2401.99999", "Round Trip Paper", scored=False)],
+            "has_more": False,
+        }
+
+        paper = _make_filtered_paper("2401.99999")
+        paper.title = "Round Trip Paper"
+
+        push_papers([paper], run_id="2024-01-15T07:00:00Z")
+        fetched = fetch_papers()
+
+        arxiv_ids = [p["arxiv_id"] for p in fetched]
+        titles = [p["title"] for p in fetched]
+        assert "2401.99999" in arxiv_ids
+        assert "Round Trip Paper" in titles
