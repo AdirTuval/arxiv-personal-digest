@@ -25,6 +25,7 @@ def main():
             abstract=p.abstract,
             url=p.url,
             reason="Manual test",
+            short_summary="Manual test — no summary generated.",
             is_wildcard=False,
         )
         for p in papers_raw

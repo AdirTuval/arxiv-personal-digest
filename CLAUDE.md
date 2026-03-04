@@ -37,8 +37,9 @@ arxiv-personal-digest/
 ```
 main.py
   │
-  ├── 1. updater.py     → Read scored papers from Notion since last run
+  ├── 1. updater.py     → Read engaged, unprocessed papers from Notion
   │                     → Use Claude to update preferences.yaml
+  │                     → Mark consumed papers as Processed=True
   │
   ├── 2. fetcher.py     → Fetch latest abstracts from arXiv
   │                     → Filter out IDs already in seen_papers.json
@@ -129,14 +130,15 @@ Every run, 1 paper from `exploration.adjacent_categories` is injected into the N
 | Column | Type | Description |
 |---|---|---|
 | `Title` | Title | Paper title |
+| `Short Summary` | Text | 2-3 sentence plain-English summary (Claude-generated) |
 | `URL` | URL | arXiv link |
 | `Abstract` | Text | Full abstract |
-| `Reason` | Text | Why Claude picked it |
+| `Why Selected` | Text | Why Claude picked it |
 | `Score` | Number | User fills this in (1–5) |
-| `Skip Reason` | Select | `off-topic`, `low-quality`, `already-knew-this` |
+| `Skip Reason` | Select | `off-topic`, `low-quality`, `already-knew-this`, `never got to it` |
 | `Type` | Select | `Regular`, `🔍 Explore` |
 | `Run ID` | Text | Timestamp of the run that pushed it |
-| `Scored` | Checkbox | Auto-set when Score is filled |
+| `Processed` | Checkbox | Set by updater after consuming this paper; never set by user |
 
 ---
 
@@ -192,7 +194,8 @@ class FilteredPaper(BaseModel):
     title: str
     abstract: str
     url: str
-    reason: str           # Why Claude selected it
+    reason: str           # Why Claude selected it (→ "Why Selected" in Notion)
+    short_summary: str    # 2-3 sentence plain-English summary (→ "Short Summary" in Notion)
     is_wildcard: bool
 
 class PreferencesUpdate(BaseModel):
@@ -227,6 +230,26 @@ Scheduling is fully external. Example entries:
 
 ---
 
+## Paper Engagement & Processing
+
+### What "engaged" means
+A paper is considered engaged if the user has either:
+- Filled in a **Score** (1–5), or
+- Set **Skip Reason** to `off-topic`, `low-quality`, or `already-knew-this`
+
+Selecting `never got to it` is explicitly **not** engagement — it means the user deferred review and the paper should not influence preferences.
+
+### The `Processed` flag
+After the updater consumes an engaged paper, it calls `mark_papers_processed()` to set `Processed=True` on that page. This prevents the same paper from being re-consumed on the next run.
+
+- `Processed` is set **only by the updater**, never by the user.
+- Hide this column from the Notion view via the Properties toggle.
+
+### Deferred scoring scenario
+If a paper was pushed weeks ago and the user scores it later, it will still be picked up on the next run as long as `Processed=False`. The updater is time-agnostic — it consumes all engaged+unprocessed papers regardless of when they were pushed.
+
+---
+
 ## Development Notes
 
 - Python 3.11+
@@ -234,4 +257,18 @@ Scheduling is fully external. Example entries:
 - Test a single run with: `python src/main.py`
 - To reset state: clear `seen_papers.json` and manually reset Notion scores
 - Keep `preferences.yaml` in Git — its evolution over time is valuable signal
+
+---
+
+## Dependency Notes
+
+### notion-client pinned to 2.3.0
+
+`notion-client==3.0.0` is broken for this project:
+- It removed `client.databases.query()` entirely
+- It sends `Notion-Version: 2025-09-03` which Notion's API rejects with `400 Invalid request URL`
+
+Pin to `notion-client==2.3.0` which:
+- Retains `client.databases.query(database_id=..., start_cursor=...)`
+- Uses `Notion-Version: 2022-06-28` which Notion's API accepts
 
