@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 import fetcher
 import filter
-import notion_client
+import notion_utils
 import updater
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ def run() -> None:
         1. Update preferences from scored Notion papers (updater)
         2. Fetch new papers from arXiv, deduping via seen_papers (fetcher)
         3. Filter papers using Claude + preferences (filter)
-        4. Push filtered papers to Notion and update seen_papers (notion_client)
+        4. Push filtered papers to Notion and update seen_papers (notion_utils)
     """
     raise NotImplementedError
 

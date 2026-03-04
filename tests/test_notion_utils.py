@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 
 from models import FilteredPaper
-from notion_client import fetch_scored_papers, push_papers
+from notion_utils import fetch_scored_papers, push_papers
 
 
 def _make_filtered_paper(arxiv_id, is_wildcard=False):
@@ -18,7 +18,7 @@ def _make_filtered_paper(arxiv_id, is_wildcard=False):
 
 
 class TestPushPapers:
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_push_papers_creates_pages(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
@@ -36,7 +36,7 @@ class TestPushPapers:
         assert "2401.12346" in result
         assert mock_client.pages.create.call_count == 2
 
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_push_papers_sets_explore_type_for_wildcard(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
@@ -53,7 +53,7 @@ class TestPushPapers:
         type_val = properties.get("Type", {}).get("select", {}).get("name", "")
         assert type_val == "\ud83d\udd0d Explore"
 
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_push_papers_sets_regular_type(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
@@ -70,7 +70,7 @@ class TestPushPapers:
         type_val = properties.get("Type", {}).get("select", {}).get("name", "")
         assert type_val == "Regular"
 
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_push_papers_includes_run_id(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
@@ -93,7 +93,7 @@ class TestPushPapers:
         )
         assert run_id_val == run_id
 
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_push_papers_empty_list(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
@@ -103,7 +103,7 @@ class TestPushPapers:
         assert result == []
         mock_client.pages.create.assert_not_called()
 
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_push_papers_partial_failure(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
@@ -125,7 +125,7 @@ class TestPushPapers:
 
 
 class TestFetchScoredPapers:
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_fetch_scored_papers_returns_dicts(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
@@ -156,7 +156,7 @@ class TestFetchScoredPapers:
         assert "skip_reason" in paper
         assert "paper_type" in paper
 
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_fetch_scored_papers_filters_scored_only(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client
@@ -186,7 +186,7 @@ class TestFetchScoredPapers:
         filter_str = str(query_filter)
         assert "Scored" in filter_str or "scored" in filter_str.lower()
 
-    @patch("notion_client.Client", create=True)
+    @patch("notion_utils.Client", create=True)
     def test_fetch_scored_papers_empty_database(self, mock_notion_cls):
         mock_client = MagicMock()
         mock_notion_cls.return_value = mock_client

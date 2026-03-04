@@ -12,12 +12,14 @@ DEFAULT_SEEN_PATH = Path(__file__).resolve().parent.parent / "seen_papers.json"
 
 def load_seen_papers(path: Path = DEFAULT_SEEN_PATH) -> set[str]:
     """Load the set of already-processed arXiv IDs from disk."""
-    raise NotImplementedError
+    if not path.exists():
+        return set()
+    return set(json.loads(path.read_text()))
 
 
 def save_seen_papers(path: Path, seen: set[str]) -> None:
     """Persist the set of seen arXiv IDs to disk."""
-    raise NotImplementedError
+    path.write_text(json.dumps(sorted(seen)))
 
 
 def fetch_new_papers(
@@ -30,4 +32,6 @@ def fetch_new_papers(
     Uses arxiv.fetch_papers() internally, then removes any paper whose
     arxiv_id is already in the seen-papers file.
     """
-    raise NotImplementedError
+    seen = load_seen_papers(seen_papers_path)
+    papers = fetch_papers(field, max_results)
+    return [p for p in papers if p.arxiv_id not in seen]

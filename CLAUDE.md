@@ -23,7 +23,7 @@ arxiv-personal-digest/
     ├── fetcher.py              # Fetch + dedup layer (wraps arxiv.py)
     ├── arxiv.py                # Low-level arXiv API client (fully implemented)
     ├── filter.py               # Uses Claude to filter relevant papers
-    ├── notion_client.py        # Pushes papers to Notion database
+    ├── notion_utils.py         # Pushes papers to Notion database
     ├── updater.py              # Reads scores from Notion, updates preferences
     └── models.py               # Pydantic models shared across modules
 ```
@@ -44,7 +44,7 @@ main.py
   ├── 3. filter.py      → Send abstracts + preferences.yaml to Claude
   │                     → Returns: relevant papers + 1 wildcard (exploration)
   │
-  └── 4. notion_client  → Push filtered papers to Notion database
+  └── 4. notion_utils   → Push filtered papers to Notion database
                         → Mark wildcard paper with Explore tag
                         → Append new IDs to seen_papers.json
 ```
