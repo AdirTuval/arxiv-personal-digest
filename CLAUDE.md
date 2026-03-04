@@ -25,7 +25,9 @@ arxiv-personal-digest/
     ├── filter.py               # Uses Claude to filter relevant papers
     ├── notion_utils.py         # Pushes papers to Notion database
     ├── updater.py              # Reads scores from Notion, updates preferences
-    └── models.py               # Pydantic models shared across modules
+    ├── models.py               # Pydantic models shared across modules
+    └── one-time-runners/
+        └── configure_notion_database.py  # One-time Notion DB schema setup
 ```
 
 ---
@@ -135,6 +137,21 @@ Every run, 1 paper from `exploration.adjacent_categories` is injected into the N
 | `Type` | Select | `Regular`, `🔍 Explore` |
 | `Run ID` | Text | Timestamp of the run that pushed it |
 | `Scored` | Checkbox | Auto-set when Score is filled |
+
+---
+
+## One-Time Setup
+
+Scripts in `src/one-time-runners/` are run manually once during initial setup. They are not part of the regular run cycle.
+
+| Script | Purpose |
+|---|---|
+| `configure_notion_database.py` | Patches the Notion database with the required schema (all columns, types, and select options). Run once before the first `main.py` invocation. |
+
+Usage:
+```bash
+python src/one-time-runners/configure_notion_database.py
+```
 
 ---
 
