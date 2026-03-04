@@ -2,6 +2,7 @@ anthropic
 httpx
 notion-client==2.3.0
 pydantic
+pymupdf
 pyyaml
 python-dotenv
 pytest

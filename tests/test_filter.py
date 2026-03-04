@@ -19,135 +19,93 @@ def _make_papers(n=5):
     ]
 
 
-def _make_claude_response(papers, wildcard_idx=None):
-    """Build a mock Claude response JSON with filtered papers."""
-    results = []
-    for i, p in enumerate(papers):
-        results.append(
-            {
-                "arxiv_id": p.arxiv_id,
-                "title": p.title,
-                "abstract": p.abstract,
-                "url": p.url,
-                "reason": f"Relevant because of topic {i}",
-                "is_wildcard": i == wildcard_idx,
-            }
+def _make_filtered(papers, wildcard_idx=None):
+    """Build FilteredPaper objects from a subset of papers."""
+    return [
+        FilteredPaper(
+            arxiv_id=p.arxiv_id,
+            title=p.title,
+            abstract=p.abstract,
+            url=p.url,
+            reason=f"Relevant because of topic {i}",
+            short_summary=f"Summary of paper {i}.",
+            is_wildcard=i == wildcard_idx,
         )
-    return json.dumps(results)
+        for i, p in enumerate(papers)
+    ]
 
 
 class TestFilterPapers:
-    @patch("filter.anthropic.Anthropic")
+    @patch("filter.llm.filter_papers_llm")
     def test_filter_papers_returns_filtered_papers(
-        self, mock_anthropic_cls, sample_preferences
+        self, mock_llm, sample_preferences
     ):
         papers = _make_papers(5)
         selected = papers[:3]
-
-        mock_client = MagicMock()
-        mock_anthropic_cls.return_value = mock_client
-        mock_msg = MagicMock()
-        mock_msg.content = [
-            MagicMock(text=_make_claude_response(selected, wildcard_idx=2))
-        ]
-        mock_client.messages.create.return_value = mock_msg
+        mock_llm.return_value = _make_filtered(selected, wildcard_idx=2)
 
         result = filter_papers(papers, sample_preferences)
 
         assert isinstance(result, list)
         assert all(isinstance(fp, FilteredPaper) for fp in result)
-        assert len(result) > 0
+        assert len(result) == 3
         assert all(fp.reason for fp in result)
+        assert all(fp.short_summary for fp in result)
 
-    @patch("filter.anthropic.Anthropic")
+    @patch("filter.llm.filter_papers_llm")
     def test_filter_papers_respects_max_papers(
-        self, mock_anthropic_cls, sample_preferences
+        self, mock_llm, sample_preferences
     ):
         sample_preferences["max_papers_to_push"] = 2
         papers = _make_papers(10)
         selected = papers[:2]
-
-        mock_client = MagicMock()
-        mock_anthropic_cls.return_value = mock_client
-        mock_msg = MagicMock()
-        mock_msg.content = [
-            MagicMock(text=_make_claude_response(selected))
-        ]
-        mock_client.messages.create.return_value = mock_msg
+        mock_llm.return_value = _make_filtered(selected)
 
         result = filter_papers(papers, sample_preferences)
 
         assert len(result) <= sample_preferences["max_papers_to_push"]
 
-    @patch("filter.anthropic.Anthropic")
+    @patch("filter.llm.filter_papers_llm")
     def test_filter_papers_includes_wildcard(
-        self, mock_anthropic_cls, sample_preferences
+        self, mock_llm, sample_preferences
     ):
         papers = _make_papers(5)
         selected = papers[:3]
-
-        mock_client = MagicMock()
-        mock_anthropic_cls.return_value = mock_client
-        mock_msg = MagicMock()
-        mock_msg.content = [
-            MagicMock(text=_make_claude_response(selected, wildcard_idx=2))
-        ]
-        mock_client.messages.create.return_value = mock_msg
+        mock_llm.return_value = _make_filtered(selected, wildcard_idx=2)
 
         result = filter_papers(papers, sample_preferences)
 
         wildcards = [fp for fp in result if fp.is_wildcard]
         assert len(wildcards) >= 1
 
-    @patch("filter.anthropic.Anthropic")
-    def test_filter_papers_empty_input(self, mock_anthropic_cls, sample_preferences):
+    @patch("filter.llm.filter_papers_llm")
+    def test_filter_papers_empty_input(self, mock_llm, sample_preferences):
         result = filter_papers([], sample_preferences)
 
         assert result == []
+        mock_llm.assert_not_called()
 
-    @patch("filter.anthropic.Anthropic")
+    @patch("filter.llm.filter_papers_llm")
     def test_filter_papers_no_exploration(
-        self, mock_anthropic_cls, sample_preferences
+        self, mock_llm, sample_preferences
     ):
         sample_preferences["exploration"]["enabled"] = False
         papers = _make_papers(5)
         selected = papers[:2]
-
-        mock_client = MagicMock()
-        mock_anthropic_cls.return_value = mock_client
-        mock_msg = MagicMock()
-        mock_msg.content = [
-            MagicMock(
-                text=_make_claude_response(selected, wildcard_idx=None)
-            )
-        ]
-        mock_client.messages.create.return_value = mock_msg
+        mock_llm.return_value = _make_filtered(selected, wildcard_idx=None)
 
         result = filter_papers(papers, sample_preferences)
 
         wildcards = [fp for fp in result if fp.is_wildcard]
         assert len(wildcards) == 0
 
-    @patch("filter.anthropic.Anthropic")
-    def test_filter_papers_sends_preferences_to_claude(
-        self, mock_anthropic_cls, sample_preferences
+    @patch("filter.llm.filter_papers_llm")
+    def test_filter_papers_delegates_to_llm(
+        self, mock_llm, sample_preferences
     ):
         papers = _make_papers(3)
-        selected = papers[:2]
-
-        mock_client = MagicMock()
-        mock_anthropic_cls.return_value = mock_client
-        mock_msg = MagicMock()
-        mock_msg.content = [
-            MagicMock(text=_make_claude_response(selected))
-        ]
-        mock_client.messages.create.return_value = mock_msg
+        mock_llm.return_value = _make_filtered(papers[:2])
 
         filter_papers(papers, sample_preferences)
 
-        mock_client.messages.create.assert_called_once()
-        call_kwargs = mock_client.messages.create.call_args
-        # The prompt should contain preferences and paper abstracts
-        messages = call_kwargs.kwargs.get("messages") or call_kwargs[1].get("messages")
-        prompt_text = str(messages)
-        assert "interests" in prompt_text.lower() or "preferences" in prompt_text.lower()
+        mock_llm.assert_called_once_with(papers, sample_preferences)

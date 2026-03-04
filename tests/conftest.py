@@ -48,6 +48,7 @@ def sample_filtered_paper():
             abstract="We present a method for reducing inference costs in LLMs by 40%.",
             url="http://arxiv.org/abs/2401.12345",
             reason="Directly relevant to efficient inference interests",
+            short_summary="A method for reducing LLM inference costs by 40% through dynamic pruning.",
             is_wildcard=is_wildcard,
         )
 
@@ -63,6 +64,7 @@ def sample_filtered_papers():
             abstract="Abstract about efficient inference.",
             url="http://arxiv.org/abs/2401.12345",
             reason="Matches efficient inference interest",
+            short_summary="Efficient inference method for large language models.",
             is_wildcard=False,
         ),
         FilteredPaper(
@@ -71,6 +73,7 @@ def sample_filtered_papers():
             abstract="Abstract about RAG systems.",
             url="http://arxiv.org/abs/2401.12346",
             reason="Matches RAG interest",
+            short_summary="A novel architecture for retrieval-augmented generation.",
             is_wildcard=False,
         ),
         FilteredPaper(
@@ -79,6 +82,7 @@ def sample_filtered_papers():
             abstract="Abstract about HCI with AI.",
             url="http://arxiv.org/abs/2401.12347",
             reason="Interesting exploration from cs.HC",
+            short_summary="Exploring patterns in human-AI interaction design.",
             is_wildcard=True,
         ),
     ]

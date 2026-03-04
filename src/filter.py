@@ -1,8 +1,7 @@
 import logging
 
-import anthropic
-
-from models import Paper, FilteredPaper
+import llm
+from models import FilteredPaper, Paper
 
 logger = logging.getLogger(__name__)
 
@@ -17,4 +16,6 @@ def filter_papers(
     Returns a list of FilteredPaper objects, including up to one wildcard
     from the exploration adjacent categories.
     """
-    raise NotImplementedError
+    if not papers:
+        return []
+    return llm.filter_papers_llm(papers, preferences)

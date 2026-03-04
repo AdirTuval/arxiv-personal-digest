@@ -34,6 +34,7 @@ class TestFilteredPaper:
             abstract="An abstract",
             url="http://arxiv.org/abs/2401.12345",
             reason="Relevant to interests",
+            short_summary="A summary of the test paper.",
             is_wildcard=False,
         )
         assert fp.is_wildcard is False
@@ -44,6 +45,7 @@ class TestFilteredPaper:
             abstract="An abstract",
             url="http://arxiv.org/abs/2401.12346",
             reason="Exploration pick",
+            short_summary="A summary of the wildcard paper.",
             is_wildcard=True,
         )
         assert fp_wildcard.is_wildcard is True
