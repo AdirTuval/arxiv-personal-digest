@@ -1,5 +1,7 @@
 import logging
 
+import anthropic
+
 from models import Paper, FilteredPaper
 
 logger = logging.getLogger(__name__)
