@@ -1,31 +1,29 @@
-field: cs.AI
+field: cs.CV
 max_results_per_run: 50
 max_papers_to_push: 5
 
 immutable_interests:
-  - LLM agents with tool use
-  - Efficient inference and quantization
+  - Object detection and instance segmentation architectures
+  - Image classification and recognition neural networks
+  - State-of-the-art models and benchmarks in computer vision
+  - Novel CNN and transformer-based vision architectures
 
 interests:
-  - RAG and retrieval systems for production use
-  - LLM fine-tuning on limited hardware
+  - Real-time detection and efficient vision models
+  - 3D vision, depth estimation, and scene understanding
+  - Self-supervised and contrastive learning for visual representations
+  - Video understanding and temporal modeling
 
 avoid:
-  - Pure benchmark papers with no practical application
-  - Vision-only models unrelated to language
 
 exploration:
   enabled: true
   wildcard_count: 1
   adjacent_categories:
-    - cs.IR
-    - cs.HC
-    - stat.ML
+    - cs.AI
+    - cs.LG
+    - cs.CL
 
 scoring_history_summary: ""
 
 example_papers:
-  - title: "ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs"
-    reason: "Practical tool-use framework with real API integration"
-  - title: "AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration"
-    reason: "Quantization technique that runs on consumer hardware"
