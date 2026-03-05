@@ -20,7 +20,7 @@ The tool runs a closed-loop cycle: it fetches papers, filters them with an LLM, 
 │                                           │             │
 │  ┌──────────────────┐    ┌────────────────▼─────────┐   │
 │  │  preferences.yaml│◀───│  Claude (update prefs)   │   │
-│  │  (refined)       │    │  + PDF full-text reading  │   │
+│  │  (refined)       │    │  + PDF full-text reading │   │
 │  └──────────────────┘    └──────────────────────────┘   │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
