@@ -294,9 +294,9 @@ class TestFetchScoredPapers:
         assert len(result) == 3
 
     @patch("notion_utils.fetch_papers")
-    def test_excludes_never_got_to_it(self, mock_fetch_papers):
+    def test_excludes_unknown_skip_reason(self, mock_fetch_papers):
         mock_fetch_papers.return_value = [
-            {"arxiv_id": "2401.00001", "score": None, "skip_reason": "never got to it", "processed": False},
+            {"arxiv_id": "2401.00001", "score": None, "skip_reason": "unknown-reason", "processed": False},
             {"arxiv_id": "2401.00002", "score": 3, "skip_reason": None, "processed": False},
         ]
 

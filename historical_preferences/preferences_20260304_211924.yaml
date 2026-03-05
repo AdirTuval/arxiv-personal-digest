@@ -1,0 +1,23 @@
+avoid:
+- Pure benchmark papers with no practical application
+- Vision-only models unrelated to language
+example_papers:
+- reason: I liked this because it showed practical tool use patterns
+  title: Example Paper on Tool Use
+exploration:
+  adjacent_categories:
+  - cs.IR
+  - cs.HC
+  - stat.ML
+  enabled: true
+  wildcard_count: 1
+field: cs.AI
+immutable_interests:
+- LLM agents with tool use
+- Efficient inference and quantization
+interests:
+- RAG and retrieval systems for production use
+- LLM fine-tuning on limited hardware
+max_papers_to_push: 5
+max_results_per_run: 50
+scoring_history_summary: ''

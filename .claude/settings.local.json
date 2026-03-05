@@ -4,7 +4,14 @@
       "Bash(test:*)",
       "WebFetch(domain:export.arxiv.org)",
       "WebSearch",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr:*)",
+      "Bash(python:*)",
+      "Bash(git checkout:*)",
+      "Bash(python3:*)"
     ]
   }
 }

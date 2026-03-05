@@ -92,7 +92,6 @@ r = httpx.patch(
                         {"name": "off-topic", "color": "red"},
                         {"name": "low-quality", "color": "orange"},
                         {"name": "already-knew-this", "color": "gray"},
-                        {"name": "never got to it", "color": "yellow"},
                     ]
                 }
             },
