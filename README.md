@@ -77,7 +77,7 @@ Create a Notion page for each filtered paper with title, short summary, abstract
 | Abstract | Text | Full abstract |
 | Why Selected | Text | Why Claude picked this paper |
 | Score | Number | User fills in (1-5) |
-| Skip Reason | Select | `off-topic`, `low-quality`, `already-knew-this`, `never got to it` |
+| Skip Reason | Select | `off-topic`, `low-quality`, `already-knew-this` |
 | Type | Select | `Regular` or `🔍 Explore` |
 | Run ID | Text | Timestamp of the run that pushed it |
 | Processed | Checkbox | Set by the updater after consuming the paper |
@@ -91,8 +91,6 @@ Papers appear in your Notion database after each run. Review them and either ass
 A paper is considered "engaged" if the user has either:
 - Filled in a **Score** (1-5), or
 - Set a **Skip Reason** of `off-topic`, `low-quality`, or `already-knew-this`
-
-Selecting `never got to it` is **not** engagement — the paper is ignored for preference learning.
 
 ### The Processed Flag
 

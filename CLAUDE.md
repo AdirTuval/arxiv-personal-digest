@@ -135,7 +135,7 @@ Every run, 1 paper from `exploration.adjacent_categories` is injected into the N
 | `Abstract` | Text | Full abstract |
 | `Why Selected` | Text | Why Claude picked it |
 | `Score` | Number | User fills this in (1–5) |
-| `Skip Reason` | Select | `off-topic`, `low-quality`, `already-knew-this`, `never got to it` |
+| `Skip Reason` | Select | `off-topic`, `low-quality`, `already-knew-this` |
 | `Type` | Select | `Regular`, `🔍 Explore` |
 | `Run ID` | Text | Timestamp of the run that pushed it |
 | `Processed` | Checkbox | Set by updater after consuming this paper; never set by user |
@@ -236,8 +236,6 @@ Scheduling is fully external. Example entries:
 A paper is considered engaged if the user has either:
 - Filled in a **Score** (1–5), or
 - Set **Skip Reason** to `off-topic`, `low-quality`, or `already-knew-this`
-
-Selecting `never got to it` is explicitly **not** engagement — it means the user deferred review and the paper should not influence preferences.
 
 ### The `Processed` flag
 After the updater consumes an engaged paper, it calls `mark_papers_processed()` to set `Processed=True` on that page. This prevents the same paper from being re-consumed on the next run.
