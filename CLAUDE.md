@@ -149,6 +149,7 @@ Scripts in `src/one-time-runners/` are run manually once during initial setup. T
 | Script | Purpose |
 |---|---|
 | `configure_notion_database.py` | Patches the Notion database with the required schema (all columns, types, and select options). Run once before the first `main.py` invocation. |
+| `first_push.py` | Runs pipeline steps 2–4 (fetch, filter, push) without the updater. Use on the very first run when there are no scored papers in Notion yet. |
 
 Usage:
 ```bash
