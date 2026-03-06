@@ -33,14 +33,15 @@ def run() -> None:
     # Step 1: Update preferences from scored papers
     try:
         scored_papers = notion_utils.fetch_scored_papers()
-        updater.update_preferences(scored_papers, PREFERENCES_PATH)
         if scored_papers:
+            updater.update_preferences(scored_papers, PREFERENCES_PATH)
             page_ids = [p["page_id"] for p in scored_papers]
             notion_utils.mark_papers_processed(page_ids)
             logger.info("Processed %d scored papers", len(scored_papers))
+        else:
+            logger.info("No scored papers, skipping updater")
     except Exception:
         logger.exception("Updater failed, continuing with rest of pipeline")
-
     # Step 2: Fetch new papers
     preferences = yaml.safe_load(Path.read_text(PREFERENCES_PATH))
     field = preferences["field"]
