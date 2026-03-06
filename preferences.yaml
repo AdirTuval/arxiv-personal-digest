@@ -1,6 +1,6 @@
 field: cs.CV
 max_results_per_run: 50
-max_papers_to_push: 5
+max_papers_to_push: 3
 
 immutable_interests:
   - Object detection and instance segmentation architectures

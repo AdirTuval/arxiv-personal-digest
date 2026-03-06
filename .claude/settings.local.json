@@ -11,7 +11,8 @@
       "Bash(gh pr:*)",
       "Bash(python:*)",
       "Bash(git checkout:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(gh auth:*)"
     ]
   }
 }
